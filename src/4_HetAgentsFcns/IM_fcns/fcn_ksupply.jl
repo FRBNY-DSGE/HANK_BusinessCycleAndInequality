@@ -45,9 +45,15 @@ function Ksupply(RB_guess::Float64, R_guess::Float64, n_par::NumericalParameters
     k_a_star            = zeros(n)
     c_a_star            = zeros(n)
     c_n_star            = zeros(n)
+    ca_old = similar(Vm)
+    ma_old = similar(Vm)
+    ka_old = similar(Vm)
+    cn_old = similar(Vm)
+    mn_old = similar(Vm)
 
     while dist > n_par.ϵ && count < 1000 # Iterate consumption policies until converegence
         count           = count + 1
+
         # Take expectations for labor income change
         EVk             = reshape(reshape(Vk, (n[1] .* n[2], n[3])) * n_par.Π', (n[1], n[2], n[3]))
         EVm             = reshape((reshape(eff_int, (n[1] .* n[2], n[3])) .*
@@ -70,7 +76,7 @@ function Ksupply(RB_guess::Float64, R_guess::Float64, n_par::NumericalParameters
         Vk              = Vk_new
     end
     println(dist)
-    
+
     #------------------------------------------------------
     # Find stationary distribution (Is direct transition better for large model?)
     #------------------------------------------------------
@@ -85,7 +91,6 @@ function Ksupply(RB_guess::Float64, R_guess::Float64, n_par::NumericalParameters
         # Calculate left-hand unit eigenvector (uses Krylov package)
         aux = real.(eigsolve(TransitionMat', 1)[2][1])
         distr = reshape((aux[:]) ./ sum((aux[:])),  (n_par.nm, n_par.nk, n_par.ny))
-    
     else
         # Direct Transition
         distr = n_par.dist_guess #ones(n_par.nm, n_par.nk, n_par.ny)/(n_par.nm*n_par.nk*n_par.ny)

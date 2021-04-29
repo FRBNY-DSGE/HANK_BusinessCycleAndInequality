@@ -25,7 +25,7 @@ function Kdiff(K_guess::Float64, n_par::NumericalParameters, m_par::ModelParamet
     RB              = m_par.RB ./ m_par.π                                       # Real return on liquid assets
     eff_int         = (RB .+ m_par.Rbar .* (n_par.mesh_m .<= 0.0))              # effective rate depending on assets
     GHHFA           = ((m_par.γ + m_par.τ_prog) / (m_par.γ + 1.0))              # transformation (scaling) for composite good
-    
+
     #----------------------------------------------------------------------------
     # Array (inc) to store incomes
     # inc[1] = labor income , inc[2] = rental income,
@@ -39,7 +39,7 @@ function Kdiff(K_guess::Float64, n_par::NumericalParameters, m_par::ModelParamet
     # gros (labor) incomes
     incgross        = n_par.grid_y .* mcw .* w  .* N ./ n_par.H                 # gross income workers (wages)
     incgross[end]   = n_par.grid_y[end] .* profits                              # gross income entrepreneurs (profits)
-    
+
     # net (labor) incomes
     incnet          = m_par.τ_lev .* (mcw .* w .* N ./ n_par.H .* n_par.grid_y).^(1.0 - m_par.τ_prog)
     incnet[end]     = m_par.τ_lev .* (n_par.grid_y[end] .* profits).^(1.0 - m_par.τ_prog)
@@ -48,9 +48,9 @@ function Kdiff(K_guess::Float64, n_par::NumericalParameters, m_par::ModelParamet
 
     inc[1]          = GHHFA .* m_par.τ_lev .* (n_par.mesh_y .* mcw .* w .* N ./ n_par.H).^(1.0 - m_par.τ_prog) .+
                         (1.0 .- mcw) .* w .* N .* (1.0 .- av_tax_rate) .* n_par.HW         # labor income net of taxes incl. union profits
-                        
+
     inc[1][:,:,end] = m_par.τ_lev .* (n_par.mesh_y[:, :, end] * profits).^(1.0 - m_par.τ_prog) # profit income net of taxes
-    
+
     # incomes out of wealth
     inc[2]          = r .* n_par.mesh_k                                         # rental income
     inc[3]          = eff_int .* n_par.mesh_m                                   # liquid asset income
@@ -74,6 +74,7 @@ function Kdiff(K_guess::Float64, n_par::NumericalParameters, m_par::ModelParamet
         Vk          = Vk_guess
         distr       = distr_guess
     end
+
     #----------------------------------------------------------------------------
     # Calculate supply of funds for given prices
     #----------------------------------------------------------------------------
@@ -81,7 +82,7 @@ function Kdiff(K_guess::Float64, n_par::NumericalParameters, m_par::ModelParamet
     K               = KS[1]                                                     # capital
     Vm              = KS[end-2]                                                 # marginal value of liquid assets
     Vk              = KS[end-1]                                                 # marginal value of illiquid assets
-    distr           = KS[end]                                                   # stationary distribution  
+    distr           = KS[end]                                                   # stationary distribution
     diff            = K - K_guess                                               # excess supply of funds
     return diff, Vm, Vk, distr
 end

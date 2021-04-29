@@ -1,23 +1,37 @@
 # make sure that your pwd is set to the folder containing script and HANKEstim
 # otherwise adjust the load path
 # cd("HANK_BusinessCycleAndInequality/src")
-
+#
+# Need 5G to compute steady state and linearize
+using Pkg, JLD2, Random
+Pkg.activate("../")
+Pkg.pin(name = "JLD2", version = "0.1.11")
 push!(LOAD_PATH, pwd())
-using HANKEstim
+using HANKEstim, ForwardDiff
 
 #initialize model parameters
 m_par = ModelParameters()
-# load estimated parameters from HANKX+ estimation and update model parameters
-HANKEstim.@load "7_Saves/HANKXplus_postmean.jld2" par_final
-m_par = HANKEstim.Flatten.reconstruct(m_par, par_final[1:length(par_final) - length(HANKEstim.e_set.meas_error_input)])
+Random.seed!(1793)
+@time begin
+    sr = compute_steadystate(m_par)
+end
+include("save_sr.jl")
+@time begin
+    lr = linearize_full_model(sr, m_par)
+end
+JLD2.jldopen("linearize_full_model_output_seed1793.jld2", true, true, true, IOStream) do file
+    write(file, "gx", lr.State2Control)
+    write(file, "hx", lr.LOMstate)
+    write(file, "A", lr.A)
+    write(file, "B", lr.B)
+end
 
-# Calculate Steady State
-sr    = compute_steadystate(m_par)
-HANKEstim.@save "7_Saves/steadystate.jld2" sr
-# HANKEstim.@load "7_Saves/steadystate.jld2" sr
-
-lr    = linearize_full_model(sr, m_par)
-HANKEstim.@save "7_Saves/linearresults.jld2" lr
+#=@time begin # 230s, incl compile time
+    Random.seed!(1793)
+    lr    = linearize_full_model(sr, m_par)
+end
+@assert false
+HANKEstim.@save "7_Saves/linearresults.jld2" lr=#
 # HANKEstim.@load "7_Saves/linearresults.jld2"
 
 # plot some irfs to tfp (z) shock
@@ -40,7 +54,7 @@ HANKEstim.@save "7_Saves/linearresults.jld2" lr
 # plt1 = plot!(IRF_state_sparse[sr.indexes.I,:], label = "Investment (percent)")
 # plt1 = plot!(IRF_state_sparse[sr.indexes.Y,:], label = "Output (percent)")
 # plt1 = plot!(IRF_state_sparse[sr.indexes.C,:], label = "Consumption (percent)")
-
+#=
 if HANKEstim.e_set.estimate_model == true
     # warning: estimation might take a long time!
     er = find_mode(sr, lr, m_par)
@@ -48,3 +62,4 @@ if HANKEstim.e_set.estimate_model == true
     er = load_mode(sr; file = HANKEstim.e_set.save_mode_file)
     # montecarlo(sr, lr, er, m_par)
 end
+=#

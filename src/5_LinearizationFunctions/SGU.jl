@@ -55,18 +55,17 @@ function SGU(XSS::Array,A::Array,B::Array, m_par::ModelParameters, n_par::Numeri
     # if maximum(abs.(F))/10>n_par.ϵ
     #     @warn  "F=0 is not at required precision"
     # end
-    
+
     ############################################################################
     # Calculate Jacobians of the Difference equation F
     ############################################################################
 
-    nxB         = length_X0 -length(indexes.Vm) - length(indexes.Vk) 
+    nxB         = length_X0 -length(indexes.Vm) - length(indexes.Vk)
     nxA         = length_X0 - length(indexes.distr_y) - length(indexes.distr_m) - length(indexes.distr_k)
     BA          = ForwardDiff.jacobian(x-> Fsys(
                                 [x[1:indexes.Vm[1]-1]; zeros(length(indexes.Vm) + length(indexes.Vk)); x[indexes.Vm[1]:nxB]],
                                 [zeros(length(indexes.distr_y) + length(indexes.distr_m) + length(indexes.distr_k)); x[nxB+1:end]] ,
                                 XSS,m_par,n_par,indexes,Γ,compressionIndexes,DC, IDC, DCD, IDCD),zeros(nxB+nxA))
-    
     B[:,1:indexes.Vm[1]-1]          = BA[:,1:indexes.Vm[1]-1]
     B[:,indexes.Vk[end]+1:end]      = BA[:,indexes.Vm[1]:nxB]
     A[:,indexes.distr_y[end]+1:end] = BA[:,nxB+1:end]
@@ -94,11 +93,10 @@ function SGU(XSS::Array,A::Array,B::Array, m_par::ModelParameters, n_par::Numeri
         i = indexes.distr_y[count]
         A[indexes.distr_y,i] = -Γ[3][1:end-1,count]
     end
-    
+
     ############################################################################
     # Solve the linearized model: Policy Functions and LOMs
     ############################################################################
     gx, hx, alarm_sgu, nk = SolveDiffEq(A,B, n_par, estim)
     return gx, hx, alarm_sgu, nk, A, B
 end
-

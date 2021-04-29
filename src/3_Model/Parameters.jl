@@ -18,7 +18,7 @@ julia> priors = collect(metaflatten(m_par, prior))
 """
 @label @latex_label @prior @flattenable @with_kw struct ModelParameters{T}
 	# variable = value  | ascii name 	| LaTex name 	| Prior distribution						| estimated ? # description
-	
+
 	# Household preference parameters
 	ξ::T = 4.0    		| "xi" 			| L"\xi" 		| _ 										| false # risk aversion
 	γ::T = 2.0    		| "gamma" 		| L"\gamma" 	|  _  										| false # inverse Frisch elasticity
@@ -133,13 +133,13 @@ julia> n_par = NumericalParameters(mmin = -6.6, mmax = 1000)
 	use_Krylof::Bool   	= true 	 # use Krylof package /eigs to calculate stzationary distribution
 	sol_algo::Symbol   	= :schur # options: :schur (Klein's method), :litx (accelerated linear time iteration),
 								 # and :lit (naive linear time iteration) the latter is slower
-							 	 # and less precise in our implementation than litx. 
+							 	 # and less precise in our implementation than litx.
 								 # :litx and :schur are similar in speed and results.
 	verbose::Bool		= true	 # verbose model
 	reduc_value::Float64   = 1e-5  # Lost fraction of "energy" in the DCT compression for value functions
 	reduc_copula::Integer  = 10    # number of coefficients for dct that describes variations of the copula
 	further_compress::Bool = false # remove non-volatile basis functions
-	
+
 	# Parameters that will be overwritten in the code
 	ny::Int            = 2    							# ngrid income
 	naggrstates::Int   = 16 							# (placeholder for the) number of aggregate states
@@ -148,16 +148,16 @@ julia> n_par = NumericalParameters(mmin = -6.6, mmax = 1000)
 	nstates::Int       = ny + nk + nm + naggrstates - 3 # (placeholder for the) number of states + controls in total
 	ncontrols::Int	   = 16 							# (placeholder for the) number of controls in total
 	ntotal::Int 	   = nstates+ncontrols 				# (placeholder for the) number of states+ controls in total
-	
+
 	aggr_names::Array{String,1} = ["Something"] 		# Placeholder for names of aggreagates
-	
+
 	Π::Matrix{Float64}       	= [0.9 0.1; 0.1 0.9] 	# transition matrix income
-	
+
 	# initial gues for stationary distribution (needed if iterative procedure is used)
-	dist_guess::Array{Float64,3}= ones(nm, nk, ny)/(nm*nk*ny) 
+	dist_guess::Array{Float64,3}= ones(nm, nk, ny)/(nm*nk*ny)
 	grid_y::Array{Float64,1} 	= [0.5; 1.5]         		# income grid
 	# grid illiquid assets:
-	grid_k::Array{Float64,1} 	= exp.(range(log(kmin+1.0), stop = log(kmax+1.0), length = nk)) .- 1.0  
+	grid_k::Array{Float64,1} 	= exp.(range(log(kmin+1.0), stop = log(kmax+1.0), length = nk)) .- 1.0
 	# grid liquid assets:
 	grid_m::Array{Float64,1} 	= exp.(range(0, stop=log(mmax-mmin+1.0), length = nm)) .+ mmin.- 1.0
 	# meshes for income, bonds, capital
@@ -165,7 +165,7 @@ julia> n_par = NumericalParameters(mmin = -6.6, mmax = 1000)
 	mesh_m::Array{Float64,3} 	= repeat(reshape(grid_m,(nm,1,1)),outer=[1, nk, ny])
 	mesh_k::Array{Float64,3} 	= repeat(reshape(grid_k,(1,nk,1)),outer=[nm, 1, ny])
 	mesh_yk::Array{Float64,2} 	= repeat(reshape(grid_y,(1,ny)),outer=[ nk, 1])
-	
+
 
 	bounds_y::Array{Float64,1} = [0.5; 1; 1.5] 	# (placeholder) bonds of income bins (overwritten by Tauchen)
 	H::Float64           = 1.0 					# stationary equilibrium average human capital
@@ -173,11 +173,11 @@ julia> n_par = NumericalParameters(mmin = -6.6, mmax = 1000)
 
 	Asel::Array{Bool,2} = falses(10,10)			# selector matrix (can be deleted?)
 	Bsel::Array{Bool,2} = falses(10,10)			# selector matrix (can be deleted?)
-	
+
 	# Storage for linearization results
 	LOMstate_save::Array{Float64,2}      = zeros(nstates, nstates)
 	State2Control_save::Array{Float64,2} = zeros(ncontrols, nstates)
-	
+
 end
 
 

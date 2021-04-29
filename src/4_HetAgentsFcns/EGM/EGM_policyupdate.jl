@@ -21,7 +21,7 @@ function EGM_policyupdate(EVm::Array,
                           Tshock::Real,
                           inc::Array,
                           n_par::NumericalParameters,
-                          m_par::ModelParameters, 
+                          m_par::ModelParameters,
                           warnme::Bool)
 
 ################### Copy/read-out stuff#####################################
@@ -102,7 +102,6 @@ E_return_diff   = term1 .- EMU                          # difference conditional
 m_a_aux1        = Fastroot(n_par.grid_m,E_return_diff)  # Find indifferent m by interpolation of two neighboring points a, b ∈ grid_m with:  E_return_diff(a) < 0 < E_return_diff(b)
                                                         # (Fastroot does not allow for extrapolation and uses non-negativity constraint and monotonicity)
 m_a_aux         = reshape(m_a_aux1, (n[2],n[3]))
-
 ###########################################################################
 ## EGM Step 3: Constraints for money and capital are not binding         ##
 ###########################################################################
@@ -115,14 +114,14 @@ step            = diff(n_par.grid_m)                            # Stepsize on gr
 for j in eachindex(m_a_aux)
     xi          = m_a_aux[j]
     # find indexes on grid next smallest to optimal policy
-    if xi.> n_par.grid_m[n[1]-1]                                # policy is larger than highest grid point 
+    if xi.> n_par.grid_m[n[1]-1]                                # policy is larger than highest grid point
         idx     = n[1]-1
     elseif xi.<= n_par.grid_m[1]                                # policy is smaller than lowest grid point
         idx     = 1
     else
         idx     = locate(xi,n_par.grid_m)                       # use exponential search to find grid point closest to policy (next smallest)
     end
-    
+
     s           = (xi .- n_par.grid_m[idx])./step[idx]          # Distance of optimal policy to next grid point
 
     EMU_star[j] = EMU[idx .+ aux_index[j]].*(1.0 -s) .+
@@ -213,12 +212,13 @@ log_index2          = zeros(Bool,n[1].*n[2])
          c_a_star1[log_index2]  = Resource_grid[log_index2,j] .+ labor_inc_grid[j] .- n_par.grid_m[1]
          m_a_star1[log_index2] .= n_par.grid_m[1]
          k_a_star1[log_index2] .= 0.0
+
          # Check if policies go beyond largest gr
-         for kk = 1:n[2]               
+         for kk = 1:n[2]
             for mm = 1:n[1]
                 runind                  = mm + (kk-1)*n[1]  # linear indexing
                 mp                      = m_a_star1[runind] # liquid asset saving
-                kp                      = k_a_star1[runind] # illiquid asset saving  
+                kp                      = k_a_star1[runind] # illiquid asset saving
                 c_a_star[mm,kk,j]       = c_a_star1[runind] # consumption policy
                 if mp <mmax
                     m_a_star[mm,kk,j]   = mp
@@ -237,4 +237,3 @@ end
 
     return c_a_star, m_a_star, k_a_star, c_n_star, m_n_star
 end
-

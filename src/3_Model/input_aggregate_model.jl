@@ -1,13 +1,13 @@
 #------------------------------------------------------------------------------
-# THIS FILE CONTAINS THE "AGGREGATE" MODEL EQUATIONS, I.E. EVERYTHING  BUT THE 
-# HOUSEHOLD PLANNING PROBLEM. THE lATTER IS DESCRIBED BY ONE EGM BACKWARD STEP AND 
+# THIS FILE CONTAINS THE "AGGREGATE" MODEL EQUATIONS, I.E. EVERYTHING  BUT THE
+# HOUSEHOLD PLANNING PROBLEM. THE lATTER IS DESCRIBED BY ONE EGM BACKWARD STEP AND
 # ONE FORWARD ITERATION OF THE DISTRIBUTION.
 #
-# AGGREGATE EQUATIONS TAKE THE FORM 
+# AGGREGATE EQUATIONS TAKE THE FORM
 # F[EQUATION NUMBER] = lhs - rhs
 #
 # EQUATION NUMBERS ARE GENEREATED AUTOMATICALLY AND STORED IN THE INDEX STRUCT
-# FOR THIS THE "CORRESPONDING" VARIABLE NEEDS TO BE IN THE LIST OF STATES 
+# FOR THIS THE "CORRESPONDING" VARIABLE NEEDS TO BE IN THE LIST OF STATES
 # OR CONTROLS.
 #------------------------------------------------------------------------------
 
@@ -40,7 +40,7 @@ Y_GAP                   = output(K,Z,N_GAP, m_par)
 
 # tax progressivity variabels used to calculate e.g. total taxes
 tax_prog_scale          = (m_par.γ + m_par.τ_prog) / ((m_par.γ + τprog))                        # scaling of labor disutility including tax progressivity
-inc                     = [τlev .* ((n_par.mesh_y / n_par.H).^tax_prog_scale .* 
+inc                     = [τlev .* ((n_par.mesh_y / n_par.H).^tax_prog_scale .*
                             mcw .*w .* N ./ Ht).^(1.0 - τprog)]                                 # capital liquidation Income (q=1 in steady state)
 inc[1][:,:,end]        .= τlev .* (n_par.mesh_y[:,:,end] .* profits).^(1.0 - τprog)             # profit income net of taxes
 
@@ -49,7 +49,7 @@ incgross[1][:,:,end]   .= (n_par.mesh_y[:,:,end] .* profits)                    
 
 taxrev                  = incgross[1] .- inc[1]                                                 # tax revenues
 incgrossaux             = incgross[1]
-# Summary for aggregate human capital 
+# Summary for aggregate human capital
 distr_y                 = sum(distrSS, dims=(1,2))
 Htact                   = dot(distr_y[1:end-1],(n_par.grid_y[1:end-1]/n_par.H).^((m_par.γ + m_par.τ_prog)/(m_par.γ + τprog)))
 
@@ -103,17 +103,17 @@ F[indexes.RB]           = log(RBPrime) - Xss[indexes.RBSS] -
                          m_par.ρ_R * (log.(RB) - Xss[indexes.RBSS])  - log(Rshock)
 
 # Tax rule
-F[indexes.τprog]        = log(τprog) - m_par.ρ_P * log(τproglag)  - 
-                         (1.0 - m_par.ρ_P) *(Xss[indexes.τprogSS]) - 
+F[indexes.τprog]        = log(τprog) - m_par.ρ_P * log(τproglag)  -
+                         (1.0 - m_par.ρ_P) *(Xss[indexes.τprogSS]) -
                          (1.0 - m_par.ρ_P) * m_par.γ_YP * log(Y/Y_GAP) -
-                         (1.0 - m_par.ρ_P) * m_par.γ_BP * (log(B)- Xss[indexes.BSS]) - 
+                         (1.0 - m_par.ρ_P) * m_par.γ_BP * (log(B)- Xss[indexes.BSS]) -
                          log(Tprogshock)
 
 F[indexes.τlev]         = av_tax_rate - (distrSS[:]' * taxrev[:]) ./ (distrSS[:]' * incgrossaux[:]) # Union profits are taxed at average tax rate
 
 F[indexes.T]            = log(T) - log(distrSS[:]' * taxrev[:] + av_tax_rate * unionprofits)
 
-F[indexes.av_tax_rate]  = log(av_tax_rate) - m_par.ρ_τ * log(av_tax_ratelag)  - 
+F[indexes.av_tax_rate]  = log(av_tax_rate) - m_par.ρ_τ * log(av_tax_ratelag)  -
                             (1.0 - m_par.ρ_τ) * Xss[indexes.av_tax_rateSS] -
                             (1.0 - m_par.ρ_τ) * m_par.γ_Yτ * log(Y / Y_GAP) -
                             (1.0 - m_par.ρ_τ) * m_par.γ_Bτ * (log(B) - Xss[indexes.BSS])
@@ -124,12 +124,12 @@ F[indexes.π]            = log(BgrowthPrime) + m_par.γ_B * (log(B)- Xss[indexes
 
 F[indexes.G]            = log(G) - log(BPrime + T - RB / π * B)             # Government Budget Constraint
 
-# Phillips Curve to determine equilibrium markup, output, factor incomes 
+# Phillips Curve to determine equilibrium markup, output, factor incomes
 F[indexes.mc]           = (log.(π)- Xss[indexes.πSS]) - κ *(mc - 1 ./ μ ) -
-                            m_par.β * ((log.(πPrime) - Xss[indexes.πSS]) .* YPrime ./ Y) 
-                        
+                            m_par.β * ((log.(πPrime) - Xss[indexes.πSS]) .* YPrime ./ Y)
 
-# Wage Phillips Curve 
+
+# Wage Phillips Curve
 F[indexes.mcw]          = (log.(πw)- Xss[indexes.πwSS]) - (κw * (mcw - 1 ./ μw) +
                             m_par.β * ((log.(πwPrime) - Xss[indexes.πwSS]) .* WagesumPrime ./ Wagesum))
 # worker's wage = mcw * firm's wage
@@ -147,7 +147,7 @@ F[indexes.mcww]         = log.(mcww) - log.(mcw * w)                        # wa
 F[indexes.w]            = log.(w) - log.(wage(Kserv, Z * mc, N, m_par))     # wages that firms pay
 
 F[indexes.union_firm_profits]   = log.(union_firm_profits)  - log.(w.*N .* (1.0 - mcw))  # profits of the monopolistic unions
-F[indexes.unionprofits]         = log.(unionprofits)        - log.((1.0 - exp(Xss[indexes.mcwSS])) .* w .* N  + m_par.ωU .* 
+F[indexes.unionprofits]         = log.(unionprofits)        - log.((1.0 - exp(Xss[indexes.mcwSS])) .* w .* N  + m_par.ωU .*
                                                                     (union_firm_profits - (1.0 - exp(Xss[indexes.mcwSS])) .* w .* N + log.(union_Retained))) # distributed profits to households
 F[indexes.union_Retained]       = log.(union_RetainedPrime) - (union_firm_profits .- unionprofits .+ log.(union_Retained) .* (RB ./ π)) # Accumulation equation, Retained is in levels
 
@@ -160,7 +160,7 @@ F[indexes.q]            = 1.0 - ZI * q * (1.0 - m_par.ϕ / 2.0 * (Igrowth - 1.0)
                           m_par.ϕ * (Igrowth - 1.0) * Igrowth)  -
                           m_par.β * ZIPrime * qPrime * m_par.ϕ * (IgrowthPrime - 1.0) * (IgrowthPrime)^2.0
 # Asset market premia
-F[indexes.LP]           = log.(LP)                  - (log((q + r - 1.0)/qlag) - log(RB / π))                   # Ex-post liquidity premium           
+F[indexes.LP]           = log.(LP)                  - (log((q + r - 1.0)/qlag) - log(RB / π))                   # Ex-post liquidity premium
 F[indexes.LPXA]         = log.(LPXA)                - (log((qPrime + rPrime - 1.0)/q) - log(RBPrime / πPrime))  # ex-ante liquidity premium
 
 
@@ -173,11 +173,11 @@ F[indexes.C]            = log.(Y .- G .- I .- BD*m_par.Rbar .+ (A .- 1.0) .* RB 
 
 # Error Term on prices/aggregate summary vars (logarithmic, controls), here difference to SS value averages
 F[indexes.K]            = log.(K)     - Xss[indexes.KSS]                                                            # Capital market clearing
-F[indexes.BD]           = log.(BD)    - Xss[indexes.BDSS]                                                        # IOUs            
+F[indexes.BD]           = log.(BD)    - Xss[indexes.BDSS]                                                        # IOUs
 F[indexes.B]            = log.(B)     - log.( exp(Xss[indexes.BSS]) + log.(Retained) + log.(union_Retained) )   # Bond market clearing
 F[indexes.BY]           = log.(BY)    - log.(B/Y)                                                               # Bond to Output ratio
 F[indexes.TY]           = log.(TY)    - log.(T/Y)                                                               # Tax to output ratio
 F[indexes.totRetainedY] = log.(totRetainedY) - ((log(Retained) + log(union_Retained)) / Y)                      # Retained Earnings to GDP
 
-# Add distributional summary stats that do change with other aggregate controls/prices so that the stationary 
+# Add distributional summary stats that do change with other aggregate controls/prices so that the stationary
 F[indexes.Ht]           = log.(Ht) - log.(Htact)
